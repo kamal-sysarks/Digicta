@@ -1,6 +1,9 @@
+
+
 module.exports = (app, options) => {
-    app.post('/registerPatient', (req, res, next) => {
-        return options.patientRegister(req.body)
+    app.post('/registerPatient', async (req, res, next) => {
+        
+        await options.patientRegister(req.body)
         .then(result => {
           console.log("Inside patient:" + result);
           res.status(200).send(result);
@@ -9,19 +12,20 @@ module.exports = (app, options) => {
         }).catch(next);
     })
 
-    app.post('/loginPatient', (req, res, next) => {
-        return options.patientLogin(req.body)
+    app.post('/loginPatient', async (req, res, next) => {
+        await options.patientLogin(req.body)
         .then(result => {
-          // console.log("Login Successful");
-          res.status(200).send("Login Successful");
+          if(!result){
+            return res.status(404).send("User doesn't exists");
+          }
+          res.status(200).send(result);
         }).catch(err => {
-          res.send(err);
+          res.status(500).send(err);
         }).catch(next);
     })
   
-    app.get('/patientByID', (req, res, next) => {
-   //   res.send("Hello World");
-     return options.patientByID()
+    app.get('/patientByID', async (req, res, next) => {
+     await options.patientByID()
         .then(result => {
           console.log("patient" + result);
           res.status(200).send(result);

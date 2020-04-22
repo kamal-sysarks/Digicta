@@ -16,15 +16,15 @@ process.on('uncaughtRejection', (err, promise) => {
   console.error('Unhandled Rejection', err)
 })
 
-mediator.on('db.ready', (db) => {
+mediator.on('db.ready', (conn) => {
   let rep
-  repository.connect(db)
+  console.log(conn);
+  repository.connect(conn)
     .then(repo => {
       console.log('Connected. Starting Server')
       rep = repo;
       return server.start({
         port: config.serverSettings.port,
-       // ssl: config.serverSettings.ssl,
         repo
       })
     })
@@ -37,7 +37,7 @@ mediator.on('db.ready', (db) => {
 })
 
 mediator.on('db.error', (err) => {
-  console.error(err)
+  console.log("Error: " + err)
 });
 
 config.db.connect(config.dbSettings,mediator);

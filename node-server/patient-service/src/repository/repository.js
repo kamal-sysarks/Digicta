@@ -1,52 +1,43 @@
 'use strict'
-const User = require("../models/users");
+const Patient = require("../models/users");
 
 const repository = (db) => {
   
-  const patientRegister = (patient) => {
-    return new Promise((resolve, reject) => {
-        try {
-          // const user = new User(patient);
-          const val = db.collection('patients').insertOne(patient);
-          resolve(val);
-       } catch (e) {
-          console.log(e);
-          reject(e);
-       };
-    });
+  const patientRegister = async (patient) => {
+    try {
+      const user = new Patient(patient);
+      const savedUser =  await user.save();
+      return savedUser;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+      
   }
 
-  const patientLogin = (patient) => {
-    return new Promise((resolve, reject) => {
+  const patientLogin = async (patient) => {
+    
       try{
-        db.collection('patients').findOne({email: patient.email, password: patient.password },(error, result) => {
-          if(error) throw error;
-          if(!result) reject("User Doesn't Exists");
-          console.log(result);
-          resolve(result);
-        });
+        const logInPatient = await Patient.findByCredentials(patient.email, patient.password);
+        return logInPatient;
       }catch(e){
         console.log(e);
+        return e;
       }
 
-    });
+
   }
 
-  const patientByID = () => {
-    return new Promise((resolve, reject) => {
-      try{
-        db.collection('patients').find({}).toArray((err, result) => {
-          if (err) throw err;
-          console.log(result);
-          resolve(result);
-        });
-        
-      }catch(err){
-        console.log(err);
-        reject(err);
-      }
-     
-    })
+  const patientByID = async () => {
+    
+    try {
+      const patients = await Patient.find({});
+      return patients;  
+    } catch (error) {
+      console.log("error:" + error);
+      return error;
+    }
+    
   }
 
   const disconnect = () => {
@@ -66,7 +57,7 @@ const repository = (db) => {
 const connect = (connection) => {
   return new Promise((resolve, reject) => {
     if (!connection) {
-      reject(new Error('connection db not supplied!'))
+      reject(new Error('Database Not Connected'));
     }
    // console.log(connection);
     resolve(repository(connection));

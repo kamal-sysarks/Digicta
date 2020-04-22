@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
-const userSchema = {
+var uniqueValidator = require('mongoose-unique-validator');
+
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -9,6 +12,7 @@ const userSchema = {
     },
     email: {
         type: String,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -39,8 +43,36 @@ const userSchema = {
         },
         required: [true, 'User phone number required']
       }
+});
+
+
+
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({email});
+
+    if(!user){
+        throw new Error('Unable to login');
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    return user;
 }
 
+userSchema.plugin(uniqueValidator);
 
+// Hashing the password
+userSchema.pre('save', async function (next){
+    const user = this;
 
-module.exports = mongoose.model('patient', userSchema);;
+    if(user.isModified('password')){
+        user.password = await bcrypt.hash(user.password, 8);
+    }
+    console.log('Just Before Saving');
+
+    next();
+});
+
+const User = mongoose.model('patient', userSchema);
+
+module.exports = User;
