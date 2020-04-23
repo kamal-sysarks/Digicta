@@ -10,14 +10,14 @@ const connect = (options, mediator) => {
     
     const db = mongoose.connection;
 
-    db.on("error", () => {
+    db.on("error", (err) => {
         console.log("> error occurred from the database");
         mediator.emit('db.error', err);
     });
 
     db.once("open", () => {
         console.log("> successfully opened the database");
-        mediator.emit('db.ready', db);
+        mediator.emit('db.ready', true);
     });
     // });
 }

@@ -1,5 +1,6 @@
-const express = require('express')
-const api = require('../api/patient')
+const express = require('express');
+const cors = require('cors');
+const api = require('../api/patient');
 
 const start = (options) => {
     return new Promise((resolve, reject) => {
@@ -11,6 +12,7 @@ const start = (options) => {
       }
   
       const app = express();
+      app.use(cors());
       app.use(express.json());
     //   app.use(morgan('dev'))
     //   app.use(helmet())
@@ -19,8 +21,6 @@ const start = (options) => {
         res.status(500).send('Something went wrong!')
       })
 
-      
-  
       api(app, options.repo);
   
       const server = app.listen(options.port, () => resolve(server))
@@ -28,26 +28,3 @@ const start = (options) => {
   }
   
   module.exports = Object.assign({}, {start})
-
-  // const express = require('express');
-// require('./db/mongoose');
-// const User = require('./models/users');
-
-// const app = express();
-// const port = process.env.PORT || 3000;
-
-// app.use(express.json());
-
-// app.post('/users', (req, res) => {
-//     const user = new User(req.body);
-
-//     user.save().then(()=> {
-//         res.send(user);
-//     }).catch(()=>{
-
-//     });
-// });
-
-// app.listen(port, () => {
-//     console.log('Server is up and running on port' + port);
-// });

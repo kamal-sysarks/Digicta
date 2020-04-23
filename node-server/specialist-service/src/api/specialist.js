@@ -1,31 +1,32 @@
+const auth = require('../models/auth');
 module.exports = (app, options) => {
-    app.post('/registerSpecialist', (req, res, next) => {
-        return options.patientRegister(req.body)
+    app.post('/registerSpecialist', async (req, res) => {
+      await options.specialistRegister(req.body)
         .then(result => {
           res.status(200).send(result);
         }).catch(err => {
           res.send(err);
-        }).catch(next);
+        });
     })
 
-    app.post('/loginSpecialist', (req, res, next) => {
-        return options.patientLogin(req.body)
+    app.post('/loginSpecialist', async (req, res, next) => {
+      await options.specialistLogin(req.body)
         .then(result => {
-          // console.log("Login Successful");
-          res.status(200).send("Login Successful");
+          if(!result){
+            return res.status(404).send("User doesn't exists");
+          }
+          res.status(200).send(result);
         }).catch(err => {
-          res.send(err);
+          res.status(500).send(err);
         }).catch(next);
     })
   
-    app.get('/getAllSpecialist', (req, res, next) => {
-   //   res.send("Hello World");
-     return options.allSpecialist()
+    app.get('/getAllSpecialist', auth, async (req, res) => {
+      await options.allSpecialist()
         .then(result => {
-          console.log("patient" + result);
           res.status(200).send(result);
         }).catch(err => {
           res.send(err);
-        }).catch(next)
+        })
     })
   }

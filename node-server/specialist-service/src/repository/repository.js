@@ -1,52 +1,39 @@
 'use strict'
-const User = require("../models/users");
+const Specialist = require("../models/users");
 
 const repository = (db) => {
   
-  const specialistRegister = (doctor) => {
-    return new Promise((resolve, reject) => {
-        try {
-          // const user = new User(patient);
-          const val = db.collection('specialists').insertOne(doctor);
-          resolve(val);
-       } catch (e) {
-          console.log(e);
-          reject(e);
-       };
-    });
+  const specialistRegister = async (specialist) => {
+    try {
+      const user = new Specialist(specialist);
+      const savedUser =  await user.save();
+      const token = await user.generateAuthToken();
+      return {savedUser, token};
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 
-  const specialistLogin = (patient) => {
-    return new Promise((resolve, reject) => {
-      try{
-        db.collection('specialists').findOne({email: patient.email, password: patient.password },(error, result) => {
-          if(error) throw error;
-          if(!result) reject("User Doesn't Exists");
-          console.log(result);
-          resolve(result);
-        });
-      }catch(e){
-        console.log(e);
-      }
-
-    });
+  const specialistLogin = async (specialist) => {
+    try{
+      const logInSpecialist = await Specialist.findByCredentials(specialist.email, specialist.password);
+      const token = await logInSpecialist.generateAuthToken();
+      return {logInSpecialist, token};
+    }catch(error){
+      console.log("error:" + error);
+      return error;
+    }
   }
 
-  const allSpecialist = () => {
-    return new Promise((resolve, reject) => {
-      try{
-        db.collection('specialists').find({}).toArray((err, result) => {
-          if (err) throw err;
-          console.log(result);
-          resolve(result);
-        });
-        
-      }catch(err){
-        console.log(err);
-        reject(err);
-      }
-     
-    })
+  const allSpecialist = async () => {
+    try {
+      const specialists = await Specialist.find({});
+      return specialists;  
+    } catch (error) {
+      console.log("error:" + error);
+      return error;
+    }
   }
 
   const disconnect = () => {

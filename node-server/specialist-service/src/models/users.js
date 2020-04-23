@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const userSchema = {
+var uniqueValidator = require('mongoose-unique-validator');
+
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -9,6 +13,7 @@ const userSchema = {
     },
     email: {
         type: String,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -38,9 +43,68 @@ const userSchema = {
           message: props => `${props.value} is not a valid phone number!`
         },
         required: [true, 'User phone number required']
-      }
+    },
+    specialization: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    highestDegree: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    medlicensenum: {
+        type: Number,
+        required: true,
+        trim: true,
+    },
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
+});
+
+userSchema.methods.generateAuthToken = async function(){
+    const user = this;
+    const token = jwt.sign({_id: user._id.toString()}, 'flutterPOC');
+    user.tokens = user.tokens.concat({token});
+    await user.save();
+    return token;
 }
 
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({email});
 
+    if(!user){
+        throw new Error('Unable to login');
+    }
 
-module.exports = mongoose.model('patient', userSchema);;
+    const isMatch = await bcrypt.compare(password, user.password);
+    
+    if(!isMatch){
+        throw new Error('Unable to login');
+    }
+
+    return user;
+}
+
+userSchema.plugin(uniqueValidator);
+
+// Hashing the password
+userSchema.pre('save', async function (next){
+    const user = this;
+
+    if(user.isModified('password')){
+        user.password = await bcrypt.hash(user.password, 8);
+    }
+    console.log('Just Before Saving');
+
+    next();
+});
+
+const User = mongoose.model('specialist', userSchema);
+
+module.exports = User;

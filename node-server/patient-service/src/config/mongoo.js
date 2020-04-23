@@ -6,7 +6,7 @@ const connect = (options, mediator) => {
         
     // const uri = 'mongodb://127.0.0.1:27017/' + options.db;
     const uri = 'mongodb+srv://sysarks02:admin123@sysarks01-lyts7.mongodb.net/test?retryWrites=true&w=majority';
-    console.log(uri);
+   // console.log(uri);
     mongoose.connect(uri, options.dboptions);
     
     const db = mongoose.connection;
