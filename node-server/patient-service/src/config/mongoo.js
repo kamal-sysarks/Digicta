@@ -10,7 +10,7 @@ const connect = (options, mediator) => {
     mongoose.connect(uri, options.dboptions);
     
     const db = mongoose.connection;
-    console.log(db);
+    
     db.on("error", (err) => {
         console.log("> error occurred from the database");
         mediator.emit('db.error', err);
