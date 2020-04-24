@@ -17,9 +17,9 @@ const repository = (db) => {
 
   const specialistLogin = async (specialist) => {
     try{
-      const logInSpecialist = await Specialist.findByCredentials(specialist.email, specialist.password);
-      const token = await logInSpecialist.generateAuthToken();
-      return {logInSpecialist, token};
+      const user = await Specialist.findByCredentials(specialist.email, specialist.password);
+      const token = await user.generateAuthToken();
+      return {user, token};
     }catch(error){
       console.log("error:" + error);
       return error;

@@ -18,7 +18,7 @@ process.on('uncaughtRejection', (err, promise) => {
 
 mediator.on('db.ready', (conn) => {
   let rep
-  console.log(conn);
+ // console.log(conn);
   repository.connect(conn)
     .then(repo => {
       console.log('Connected. Starting Server')
